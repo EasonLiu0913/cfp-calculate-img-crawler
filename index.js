@@ -16,7 +16,6 @@ const productUrls = []
 const certificateNumArray = []
 let productDict = {}
 
-const noImgData = {}
 let page = 0
 let maxPage = 50
 
@@ -73,11 +72,13 @@ async function getProductsUrl(prevHtml) {
     maxPage = $(html).find('.pagerfocus').last().text()
 
     console.log('page:', page, 'maxPage:', maxPage)
-    if (page <= maxPage) {
+    if (page < maxPage) {
         try {
-            await nightmare.click(
-                '#ContentPlaceHolder1_sgv > tbody > tr:nth-child(12) > td > a:nth-child(14)'
-            )
+            await nightmare
+                .click(
+                    '#ContentPlaceHolder1_sgv > tbody > tr:nth-child(12) > td > a:nth-child(14)'
+                )
+                .wait('.pagerfocus')
         } catch (e) {
             console.log('e', e)
         }
@@ -143,11 +144,7 @@ async function getImgs(url, serialNo, productName) {
             }
             writeJson()
         }
-    } catch (error) {
-        console.log('getImgArray error:', error)
-        noImgData[serialNo] = { url: url, productName: productName }
-        writeJson()
-    }
+    } catch (error) {}
 }
 
 async function saveData(src, productName, index, serialNo) {
@@ -228,7 +225,6 @@ async function writeJson() {
         await mkdir('output', { recursive: true })
     }
 
-    await writeFile('output/noImg.json', JSON.stringify(noImgData, null, 2))
     await writeFile(
         'output/productDict.json',
         JSON.stringify(productDict, null, 2)
